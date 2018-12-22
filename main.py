@@ -100,9 +100,10 @@ def convert2pytorch(loadpath="", savepath=""):
     ptmodel = PytorchAlexNet()
     for wrapper in ptmodel.children():
         for layer in wrapper.children():
-            layer.weight.data = torch.Tensor(kt_layers[kt_counter].get_weights()[0])
-            layer.bias.data = torch.Tensor(kt_layers[kt_counter].get_weights()[1])
-            kt_counter += 1
+            if(check_tp(layer)):
+                layer.weight.data = torch.Tensor(kt_layers[kt_counter].get_weights()[0])
+                layer.bias.data = torch.Tensor(kt_layers[kt_counter].get_weights()[1])
+                kt_counter += 1
 
     # NOTE : Uncomment to save pytorch model
     #torch.save(ptmodel.state_dict(), savepath)
