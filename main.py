@@ -6,6 +6,7 @@ import torch.nn.functional as F
 from keras import Sequential
 from keras.layers import Conv2D, MaxPooling2D, BatchNormalization, ZeroPadding2D, Dropout, Activation, Flatten, Dense
 
+# NOTE : Put the keras model here
 class KerasAlexNet():
     def __init__(self, n_classes=5):
         self.model = Sequential()
@@ -41,7 +42,7 @@ class KerasAlexNet():
     def get_model(self):
         return self.model
 
-# Replace this model with your model
+# Put the Pytorch model here
 class PytorchAlexNet(nn.Module):
     def __init__(self, n_classes=5):
         super(PytorchAlexNet, self).__init__()
@@ -76,20 +77,34 @@ class PytorchAlexNet(nn.Module):
         x = self.classifier(x)
         return x
 
-def check_trainable(name):
+def check_tk(name):
     trainable = ['conv', 'dense'] # TODO : fill this with all the ones which pass a gradient
     for i in trainable:
         if i in name:
             return True
     return False
 
-def convert2pytorch(modelpath=""):
+def check_tp(layer):
+    return isinstance(layer, nn.Conv2d) or isinstance(layer, nn.Linear) # TODO : fill this with all the ones which pass a gradient
+
+def convert2pytorch(loadpath="", savepath=""):
     kmodel = KerasAlexNet()
     kmodel = kmodel.get_model()
-    #kmodel.load_weights(modelpath)
+    # NOTE : Uncomment to load weights
+    #kmodel.load_weights(loadpath)
 
-    trainable_layers = [layer for layer in kmodel.layers if check_trainable(layer.get_config()['name']) ] 
-    print(trainable_layers)
+    kt_layers = [layer for layer in kmodel.layers if check_tk(layer.get_config()['name'])] 
+    kt_counter = 0
 
+    # NOTE : Change the loops according to Pytorch Model
+    ptmodel = PytorchAlexNet()
+    for wrapper in ptmodel.children():
+        for layer in wrapper.children():
+            layer.weight.data = torch.Tensor(kt_layers[kt_counter].get_weights()[0])
+            layer.bias.data = torch.Tensor(kt_layers[kt_counter].get_weights()[1])
+            kt_counter += 1
+
+    # NOTE : Uncomment to save pytorch model
+    #torch.save(ptmodel.state_dict(), savepath)
 if __name__ == '__main__':
     convert2pytorch()
