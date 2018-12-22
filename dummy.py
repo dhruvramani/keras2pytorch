@@ -40,4 +40,4 @@ model.compile(loss='categorical_crossentropy', optimizer=sgd)
 
 model.fit(x_train, y_train, batch_size=32, epochs=1)
 layers = [layer for layer in model.layers if check_tk(layer.get_config()['name'])] 
-print(layers[0].get_weights())
+print(len(layers[0].get_weights()))
